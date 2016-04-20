@@ -21,14 +21,16 @@ namespace ConsoleGameRazcukvane
 
     class Game
     {
+        static int SPACE_BETWEEN_BLOCKS = 4;
 
-        static bool[,] BLOCK = new bool[4,2];
+        static int BLOCK_WIDTH = 5;
+        static int BLOCK_HEIGHT = 2;
 
         static int START_BOARD_X = 25;
         static int START_BOARD_Y = 25;
 
-        static int DOT_START_Y = 1;
-        static int DOT_START_X = 30;
+        static int DOT_START_Y = START_BOARD_X;
+        static int DOT_START_X = START_BOARD_Y;
 
         static int OFFSET_BALL_Y = 1;
         static int OFFSET_BALL_X = 1;
@@ -43,6 +45,7 @@ namespace ConsoleGameRazcukvane
         static int BOARD_SIZE = 7;
 
         static int GAME_SPEED = 65;
+        static int BLOCK_LINES = 2;
 
 
 
@@ -60,7 +63,7 @@ namespace ConsoleGameRazcukvane
 
         static void Print(char symbol, int x, int y, ConsoleColor color = ConsoleColor.White, int times = 0)
         {
-            Console.SetCursorPosition(x,y);
+            Console.SetCursorPosition(x, y);
             Console.ForegroundColor = color;
             if (times == 0)
             {
@@ -70,19 +73,65 @@ namespace ConsoleGameRazcukvane
                 Console.Write(new string(symbol, times));
 
         }
-        static void DrawSingleBlock(int x, int y)
+        static void DrawSingleBlock(int[] start)
         {
-            for (int i = 0; i < BLOCK.GetLength(0); i++)
+            int y = start[1]; 
+            for (int i = 0; i < BLOCK_HEIGHT; i++)
             {
-                for (int j = 0; j <BLOCK.GetLength(1); j++)
+                Print('*', start[0], y , ConsoleColor.Yellow, BLOCK_WIDTH);
+                y++;
+            }
+        }
+
+        static bool CheckIfDead()
+        {
+            return ball.y > START_BOARD_Y;
+
+        }
+        static List<Block> GenerateBlocks(int startX, int startY, int lines)
+        {
+            int stX = startX;
+            int stY = startY;
+            List<Block> blocks = new List<Block>();
+            int blocksNumber = (GAME_WIDTH / 4) - 1;
+
+            for (int i = 0; i < lines; i++)
+            {
+
+                for (int j = 0; j < ((GAME_WIDTH / BLOCK_WIDTH) / 2) + 1; j++)
                 {
-                    Print('*', i,j, ConsoleColor.Blue);
+                    blocks.Add(new Block(new int[] { stX, stY },
+                        new int[] { stX + BLOCK_WIDTH, stY + BLOCK_HEIGHT }));
+                    stX += BLOCK_WIDTH + SPACE_BETWEEN_BLOCKS;
+                }
+                stX = startX;
+                stY += BLOCK_HEIGHT + 2;
+            }
+
+            return blocks;
+        }
+
+        static void CollideWithBlocks(Position ball, List<Block> allBlocks)
+        {
+            for (int i = 0; i < allBlocks.Count; i++)
+            {
+                if (allBlocks[i].IsCoordInBlock(ball.x, ball.y))
+                {
+                    allBlocks.Remove(allBlocks[i]);
+                    OFFSET_BALL_Y *= -1;
+                    // check if hits the side of the block, then reverse X axis
                 }
             }
         }
 
-
-        static void Main(string[] args)
+        static void DrawBlocks(List<Block> blocks)
+        {
+            foreach (var block in blocks)
+            {
+                DrawSingleBlock(block.start);
+            }
+        }
+        static void Main()
         {
             Console.WindowWidth = GAME_WIDTH;
             Console.BufferWidth = GAME_WIDTH;
@@ -92,13 +141,15 @@ namespace ConsoleGameRazcukvane
 
             int boardSpeed = 0;
 
+            List<Block> blocks = GenerateBlocks(1, 1, BLOCK_LINES);
+
             while (true)
             {
-                Console.Clear();
+                DrawBlocks(blocks);
+                CollideWithBlocks(ball, blocks);
 
                 // print board
                 Print('_', START_BOARD_X, START_BOARD_Y, ConsoleColor.Red, BOARD_SIZE);
-                DrawSingleBlock(1, 1);
 
                 // land on board
                 if (!IS_BALL_ON_BOARD && ball.y == START_BOARD_Y && ball.x >= START_BOARD_X &&
@@ -138,16 +189,11 @@ namespace ConsoleGameRazcukvane
 
                 if (Console.KeyAvailable)
                 {
-
                     if (Console.ReadKey().Key == ConsoleKey.RightArrow)
                         boardSpeed = 5;
 
-                    else if (Console.ReadKey().Key == ConsoleKey.LeftArrow)
-                        boardSpeed = -5;
                     else
-                    {
-                        break;
-                    }
+                        boardSpeed = -5;
 
                     if (START_BOARD_X + boardSpeed >= 0 && (
                         (START_BOARD_X + BOARD_SIZE + boardSpeed) <= GAME_WIDTH))
@@ -155,8 +201,13 @@ namespace ConsoleGameRazcukvane
                         START_BOARD_X += boardSpeed;
                     }
                 }
-
+                if (CheckIfDead())
+                {
+                    Console.WriteLine("GAME OVER, MATE");
+                    break;
+                }
                 Thread.Sleep(GAME_SPEED);
+                Console.Clear();
             }
         }
     }
