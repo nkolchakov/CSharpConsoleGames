@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FallingRocks
@@ -14,7 +15,7 @@ namespace FallingRocks
         public ConsoleColor elColor;
 
         private static Random generator = new Random();
-        public static string symbols = "^@*&+%$#!.;-";
+        public static string symbols = "^@*&+%$#!;-";
 
         public Rock(char sym, int xDrop, int yDrop)
         {
@@ -42,6 +43,7 @@ namespace FallingRocks
 
         public static Rock CreateRandomRock(int maxX, int maxY)
         {
+            
             char symbol = GenerateSymbol();
             int objX = generator.Next(1, maxX - 1);
             int objY = generator.Next(1, (maxY - 1) / 2);

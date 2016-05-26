@@ -21,6 +21,10 @@ namespace ConsoleGameRazcukvane
 
     class Game
     {
+        static int SCORE = 0;
+
+        static char BOARD_SYMBOL = '=';
+        static char BALL_SYMBOL = '@';
         static int SPACE_BETWEEN_BLOCKS = 4;
 
         static int BLOCK_WIDTH = 5;
@@ -60,7 +64,13 @@ namespace ConsoleGameRazcukvane
 
             else return "none";
         }
+        static void WriteOnConsole(string text, int x, int y, ConsoleColor color = ConsoleColor.DarkYellow)
+        {
+            Console.SetCursorPosition(x, y);
+            Console.ForegroundColor = color;
 
+            Console.WriteLine(text);
+        }
         static void Print(char symbol, int x, int y, ConsoleColor color = ConsoleColor.White, int times = 0)
         {
             Console.SetCursorPosition(x, y);
@@ -75,10 +85,10 @@ namespace ConsoleGameRazcukvane
         }
         static void DrawSingleBlock(int[] start)
         {
-            int y = start[1]; 
+            int y = start[1];
             for (int i = 0; i < BLOCK_HEIGHT; i++)
             {
-                Print('*', start[0], y , ConsoleColor.Yellow, BLOCK_WIDTH);
+                Print('*', start[0], y, ConsoleColor.Yellow, BLOCK_WIDTH);
                 y++;
             }
         }
@@ -119,6 +129,7 @@ namespace ConsoleGameRazcukvane
                 {
                     allBlocks.Remove(allBlocks[i]);
                     OFFSET_BALL_Y *= -1;
+                    SCORE += 10;
                     // check if hits the side of the block, then reverse X axis
                 }
             }
@@ -133,6 +144,8 @@ namespace ConsoleGameRazcukvane
         }
         static void Main()
         {
+            Console.Title = "NIKI POPCORN";
+            Console.BackgroundColor = ConsoleColor.DarkRed;
             Console.WindowWidth = GAME_WIDTH;
             Console.BufferWidth = GAME_WIDTH;
             Console.WindowHeight = GAME_HEIGHT + 1;
@@ -149,7 +162,7 @@ namespace ConsoleGameRazcukvane
                 CollideWithBlocks(ball, blocks);
 
                 // print board
-                Print('_', START_BOARD_X, START_BOARD_Y, ConsoleColor.Red, BOARD_SIZE);
+                Print(BOARD_SYMBOL, START_BOARD_X, START_BOARD_Y, ConsoleColor.Green, BOARD_SIZE);
 
                 // land on board
                 if (!IS_BALL_ON_BOARD && ball.y == START_BOARD_Y && ball.x >= START_BOARD_X &&
@@ -185,7 +198,7 @@ namespace ConsoleGameRazcukvane
                 }
 
                 // print ball
-                Print('o', ball.x, ball.y, ConsoleColor.Green);
+                Print(BALL_SYMBOL, ball.x, ball.y, ConsoleColor.White);
 
                 if (Console.KeyAvailable)
                 {
@@ -206,6 +219,7 @@ namespace ConsoleGameRazcukvane
                     Console.WriteLine("GAME OVER, MATE");
                     break;
                 }
+                WriteOnConsole(string.Format("SCORE: {0}", SCORE), 5, 26) ;
                 Thread.Sleep(GAME_SPEED);
                 Console.Clear();
             }

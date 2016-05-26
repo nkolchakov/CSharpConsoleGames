@@ -15,7 +15,7 @@ namespace FallingRocks
         static int PLAYER_Y = GAME_HEIGHT;
         static int PLAYER_X = GAME_WIDTH / 2;
 
-        static string PLAYER = "(0)";
+        static string PLAYER = "\\0/";
         static int SCORE = 0;
 
         static Random colorGen = new Random();
@@ -51,7 +51,6 @@ namespace FallingRocks
                     Console.ForegroundColor = rock.elColor;
                     Console.SetCursorPosition(rock.X, rock.Y);
                     Console.WriteLine(rock.symbol);
-
                 }
                 Console.SetCursorPosition(PLAYER_X, PLAYER_Y);
                 Console.ForegroundColor = ConsoleColor.White;
